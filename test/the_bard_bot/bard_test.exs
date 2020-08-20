@@ -1,11 +1,11 @@
-defmodule TheBardBotTest do
+defmodule TheBardBot.BardTest do
   use ExUnit.Case
-  doctest TheBardBot
+  alias TheBardBot.Bard
+  doctest Bard
 
   test "sings to a name" do
     expected = ~r/Thou [\p{L}-]+ [\p{L}-]+ [\p{L}-]+, Romeo!/u
-    result = TheBardBot.sing("Romeo")
-    IO.puts(result)
+    result = Bard.sing("Romeo")
 
     assert String.match?(result, expected)
   end

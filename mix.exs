@@ -15,7 +15,7 @@ defmodule TheBardBot.MixProject do
   def application do
     [
       extra_applications: [:logger, :cowboy, :plug, :poison],
-      mod: {TheBardBot.Application, []}
+      mod: {TheBardBot, []}
     ]
   end
 
