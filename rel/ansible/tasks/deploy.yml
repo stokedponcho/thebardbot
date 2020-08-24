@@ -1,0 +1,42 @@
+---
+- hosts: webservers
+  become: yes
+  become_method: su
+  vars_files:
+    - "../vars/main.yml"
+  tasks:
+    - name: "Check if {{ deploy_dir }}/{{ app_tarball }} exists"
+      stat:
+        path: "{{ deploy_dir }}/{{ app_tarball }}"
+      register: new_tarball
+
+    - name: "Copy tarball {{ app_tarball }} to webserver"
+      copy:
+        src: "{{ app_local_path }}"
+        dest: "{{ deploy_dir }}/{{ app_tarball }}"
+      when: not new_tarball.stat.exists
+      become: yes
+      become_user: "{{ deploy_user }}"
+
+    - name: "Check if {{ deploy_dir }}/{{ app_archive }} exists"
+      stat:
+        path: "{{ deploy_dir }}//{{ app_archive }}"
+      register: new_archive
+
+    - name: "Decompress {{ deploy_dir }}/{{ app_tarball }}"
+      raw: gzip -d -k {{ deploy_dir }}/{{ app_tarball }}
+      when: not new_archive.stat.exists
+      become: yes
+      become_user: "{{ deploy_user }}"
+
+    #- name: "Load {{ deploy_dir }}/{{ app_archive }} into podman"
+      #raw: podman load -i {{ deploy_dir }}/{{ app_archive }}
+      #become: yes
+      #become_method: su
+      #become_user: "{{ deploy_user }}"
+
+    #- name: "Create container {{ app_name }}:{{ app_version }}"
+      #raw: podman run -p {{ app_port }}:{{ app_port }} -d {{ app_name }}:{{ app_version }}
+      #become: yes
+      #become_method: su
+      #become_user: "{{ deploy_user }}"

@@ -7,7 +7,13 @@ defmodule TheBardBot.MixProject do
       version: "0.1.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      releases: [
+        default: [
+          include_executables_for: [:unix],
+          steps: [:assemble, &copy_extra_files/1]
+        ]
+      ]
     ]
   end
 
@@ -27,5 +33,12 @@ defmodule TheBardBot.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:poison, "~> 4.0"}
     ]
+  end
+
+  defp copy_extra_files(release) do
+    ["assets"]
+    |> Enum.each(fn f -> File.cp_r(f, Path.join(release.path, f)) end)
+
+    release
   end
 end

@@ -1,0 +1,5 @@
+.elixir_ls
+.git
+_build
+deps
+test

@@ -1,0 +1,20 @@
+---
+app_port: "{{ lookup('env', 'APP_PORT') }}"
+app_name: "{{ lookup('env', 'APP_NAME') }}"
+app_version: "{{ lookup('env', 'APP_VERSION') }}"
+app_tarball: "{{ lookup('env', 'APP_TARBALL') }}"
+app_archive: "{{ lookup('env', 'APP_ARCHIVE') }}"
+app_local_path: "{{ lookup('env', 'APP_LOCAL_RELEASE_PATH') }}/{{ app_tarball }}"
+
+# Main app server config
+# OS user that deploys / owns the release files
+deploy_user: "{{ app_name }}"
+# OS group that deploys / owns the release files
+deploy_group: "{{ deploy_user }}"
+
+# Base directory for deploy files
+deploy_dir: "/opt/{{ app_name }}"
+
+# Directories own by the deploy user
+deploy_dirs:
+  - "{{ deploy_dir }}"
