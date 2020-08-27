@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+image="{{ app_name }}"
+version="{{ app_version }}"
+container="{{ app_name }}"
+port="{{ app_port }}"
+
+podman image exists "$image:$version"
+
+if [[ $? == 1 ]]; then
+	podman load -i {{ deploy_dir }}/{{ app_archive }}
+fi
+
+podman container exists "$container"
+
+if [[ $? == 0 ]]; then
+	podman container stop "$container"
+	podman container rm "$container"
+fi
+
+podman run -p "$port:$port" --name "$container" "$image:$version"

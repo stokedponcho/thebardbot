@@ -7,17 +7,44 @@
     - "../vars/main.yml"
   tasks:
     - name: "Add {{ deploy_group }} group"
-      group: name={{ deploy_group }} state=present
+      group:
+        name={{ deploy_group }}
+        state=present
 
     - name: "Add {{ deploy_user }} user"
-      user: name={{ deploy_user }} groups={{ deploy_group }} append=yes state=present
+      user:
+        name={{ deploy_user }}
+        groups={{ deploy_group }}
+        append=yes state=present
 
     - name: "Ensure ownership of {{ deploy_user }} home directory"
-      raw: chown {{ deploy_user }}:{{ deploy_user }} -R /home/{{ deploy_user }}
-
-    - name: "Remove password for {{ deploy_user }} user"
-      raw: passwd -d {{ deploy_user }}
+      file:
+        path=/home/{{ deploy_user }}
+        owner={{ deploy_user }}
+        group={{ deploy_group }}
+        recurse=yes
 
     - name: "Create {{ deploy_dirs }} dirs"
-      file: path={{ item }} state=directory owner={{ deploy_user }} group={{ deploy_group }} mode=0700
+      file:
+        path={{ item }}
+        state=directory
+        owner={{ deploy_user }}
+        group={{ deploy_group }}
+        mode=0700
       with_items: "{{ deploy_dirs }}"
+
+    - name: "Create sudoer config for {{ deploy_user }}"
+      template:
+        src: "../templates/sudoers.j2"
+        dest: "/etc/sudoers.d/{{ deploy_user }}-{{ app_name }}"
+        owner: root
+        group: root
+        mode: 0600
+
+    - name: "Copy systemd config file"
+      template:
+        src: "../templates/systemd.j2"
+        dest: "/etc/systemd/system/{{ app_name }}.service"
+        owner: root
+        group: root
+        mode: 0644

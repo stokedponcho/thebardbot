@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 
 env="prod"
-target="$(toolbox --container elixir run mix app | tr '\r\n' ' ' | xargs)"
+app_name="$(toolbox --container elixir run mix app.name | tr '\r\n' ' ' | xargs)"
+app_version="$(toolbox --container elixir run mix app.version | tr '\r\n' ' ' | xargs)"
+target="$app_name:$app_version"
 archive="${target/:/-}.tar"
 tarball="$archive.gz"
+ansible="$(pwd)/rel/ansible"
 
 main() {
-	eval $1 "$2"
+	eval $1
 }
 
 build() {
@@ -20,22 +23,24 @@ build() {
 
 setup() {
 	export APP_PORT=4000
-	export APP_NAME="$(toolbox --container elixir run mix app.name | tr '\r\n' ' ' | xargs)"
-	export APP_VERSION="$(toolbox --container elixir run mix app.version | tr '\r\n' ' ' | xargs)"
+	export APP_NAME=$app_name
+	export APP_VERSION=$app_version
 	export APP_TARBALL=$tarball
-	export ANSIBLE_CONFIG="$(pwd)/deploy/ansible/ansible.cfg"
-	ansible-playbook "$(pwd)/deploy/ansible/tasks/setup.yml" --ask-become-pass
+	export ANSIBLE_CONFIG="$ansible/ansible.cfg"
+
+	ansible-playbook "$ansible/tasks/setup.yml" --ask-become-pass
 }
 
 deploy() {
 	export APP_PORT=4000
-	export APP_NAME="$(toolbox --container elixir run mix app.name | tr '\r\n' ' ' | xargs)"
-	export APP_VERSION="$(toolbox --container elixir run mix app.version | tr '\r\n' ' ' | xargs)"
+	export APP_NAME=$app_name
+	export APP_VERSION=$app_version
 	export APP_TARBALL=$tarball
 	export APP_ARCHIVE=$archive
-	export ANSIBLE_CONFIG="$(pwd)/deploy/ansible/ansible.cfg"
+	export ANSIBLE_CONFIG="$ansible/ansible.cfg"
 	export APP_LOCAL_RELEASE_PATH="$(pwd)"
-	ansible-playbook "$(pwd)/deploy/ansible/tasks/deploy.yml" --ask-become-pass
+
+	ansible-playbook "$ansible/tasks/deploy.yml" --ask-become-pass
 }
 
 main $@
