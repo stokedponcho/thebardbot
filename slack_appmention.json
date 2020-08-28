@@ -1,0 +1,50 @@
+{
+    "api_app_id": "api_app_id",
+    "authed_users": [
+        "authed_users"
+    ],
+    "event": {
+        "blocks": [
+            {
+                "block_id": "KDrA",
+                "elements": [
+                    {
+                        "elements": [
+                            {
+                                "type": "user",
+                                "user_id": "user"
+                            },
+                            {
+                                "text": " hello ",
+                                "type": "text"
+                            },
+                            {
+                                "type": "user",
+                                "user_id": "U96EW6MGT"
+                            }
+                        ],
+                        "type": "rich_text_section"
+                    }
+                ],
+                "type": "rich_text"
+            }
+        ],
+        "channel": "channel",
+        "client_msg_id": "fclient_msg_id",
+        "edited": {
+            "ts": "1598618695.000000",
+            "user": "user"
+        },
+        "event_ts": "1598618364.001200",
+        "team": "team",
+        "text": "<@text> hello <@text>",
+        "ts": "1598618364.001200",
+        "type": "app_mention",
+        "user": "user"
+    },
+    "event_id": "event_id",
+    "event_time": 1598618364,
+    "team_id": "team_id",
+    "token": "token",
+    "type": "event_callback"
+}

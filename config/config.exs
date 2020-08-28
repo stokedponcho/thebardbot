@@ -3,6 +3,13 @@ import Config
 config :the_bard_bot,
   words: "assets/words.csv"
 
+config :the_bard_bot, :bot_user, TheBardBot.BotUser.Slack
+
+config :the_bard_bot, :slack,
+  host: "",
+  authorization_header: "",
+  content_type: "application/json"
+
 config :cowboy,
   port: 4000
 

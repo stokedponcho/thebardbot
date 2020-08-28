@@ -6,34 +6,63 @@ defmodule TheBardBot.Router do
   end
 
   require Logger
-  require Poison
 
   alias TheBardBot.Bard
 
-  plug(Plug.Logger, log: :debug)
+  @bot_user Application.get_env(
+              :the_bard_bot,
+              :bot_user,
+              TheBardBot.BotUser
+            )
+
+  plug(Plug.Logger)
   plug(:match)
+  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
   plug(:dispatch)
 
   get "/" do
-    get_response(conn, fn -> Bard.sing() end)
-    # send_resp(conn, 200, TheBardBot.sing())
+    send_response(conn, 200, Bard.sing())
   end
 
   get "/:name" do
-    get_response(conn, fn -> Bard.sing(name) end)
-    # send_resp(conn, 200, TheBardBot.sing(name))
+    send_response(conn, 200, Bard.sing(name))
   end
 
-  defp get_response(conn, action) do
-    value = %{
-      value: action.()
-    }
+  post "/" do
+    {status, content} = handle(conn.body_params)
+    send_response(conn, status, content)
+  end
 
-    response = Poison.encode!(value)
-    send_resp(conn |> put_resp_content_type("application/json"), 200, response)
+  defp handle(%{"challenge" => value}), do: {:ok, %{challenge: value}}
+  defp handle(%{"event" => _} = value), do: handle_event(value["event"])
+  defp handle(_), do: {:accepted, nil}
+
+  defp handle_event(%{"type" => "app_mention"} = _) do
+    Logger.info("Handling 'app_mention' event...")
+
+    message = Bard.sing()
+    channel = "G019P9ULJTU"
+
+    case @bot_user.post_message(message, channel) do
+      {:ok} -> {:no_content, nil}
+      {:error} -> {:internal_server_error, nil}
+    end
+  end
+
+  defp handle_event(_), do: {:accepted, nil}
+
+  defp send_response(conn, status, value) do
+    value =
+      case value do
+        nil -> ""
+        _ -> Jason.encode!(value)
+      end
+
+    conn = conn |> put_resp_content_type("application/json")
+    send_resp(conn, status, value)
   end
 
   match _ do
-    send_resp(conn, 404, "not found")
+    send_resp(conn, :not_found, "not found")
   end
 end
