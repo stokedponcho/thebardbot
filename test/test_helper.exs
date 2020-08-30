@@ -1,3 +1,3 @@
 ExUnit.start()
 
-Mox.defmock(TheBardBot.BotUser.Mock, for: TheBardBot.BotUser)
+Mox.defmock(TheBardBot.BotWriter.Mock, for: TheBardBot.BotWriter)

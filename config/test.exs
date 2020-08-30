@@ -1,6 +1,6 @@
 import Config
 
-config :the_bard_bot, :bot_user, TheBardBot.BotUser.Mock
+config :the_bard_bot, :bot_writer, TheBardBot.BotWriter.Mock
 
 config :logger,
   level: :debug

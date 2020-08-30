@@ -8,11 +8,17 @@ defmodule TheBardBot.Router do
   require Logger
 
   alias TheBardBot.Bard
+  alias TheBardBot.Messages
 
+  @bot_reader Application.get_env(
+                :the_bard_bot,
+                :bot_reader,
+                TheBardBot.BotReader
+              )
   @bot_user Application.get_env(
               :the_bard_bot,
-              :bot_user,
-              TheBardBot.BotUser
+              :bot_writer,
+              TheBardBot.BotWriter
             )
 
   plug(Plug.Logger)
@@ -29,27 +35,25 @@ defmodule TheBardBot.Router do
   end
 
   post "/" do
-    {status, content} = handle(conn.body_params)
+    input = @bot_reader.read(conn.body_params)
+    output = answer(input)
+    {status, content} = @bot_user.write(output)
     send_response(conn, status, content)
   end
 
-  defp handle(%{"challenge" => value}), do: {:ok, %{challenge: value}}
-  defp handle(%{"event" => _} = value), do: handle_event(value["event"])
-  defp handle(_), do: {:accepted, nil}
-
-  defp handle_event(%{"type" => "app_mention"} = _) do
-    Logger.info("Handling 'app_mention' event...")
-
-    message = Bard.sing()
-    channel = "G019P9ULJTU"
-
-    case @bot_user.post_message(message, channel) do
-      {:ok} -> {:no_content, nil}
-      {:error} -> {:internal_server_error, nil}
-    end
+  match _ do
+    send_resp(conn, :not_found, "not found")
   end
 
-  defp handle_event(_), do: {:accepted, nil}
+  defp answer(%{type: :event, value: event} = input) do
+    message = Bard.sing(hd(event.users))
+    channel = event.source
+    %Messages.Outgoing{type: input.type, value: message, destination: channel}
+  end
+
+  defp answer(input) do
+    %Messages.Outgoing{type: input.type, value: input.value}
+  end
 
   defp send_response(conn, status, value) do
     value =
@@ -60,9 +64,5 @@ defmodule TheBardBot.Router do
 
     conn = conn |> put_resp_content_type("application/json")
     send_resp(conn, status, value)
-  end
-
-  match _ do
-    send_resp(conn, :not_found, "not found")
   end
 end

@@ -1,14 +1,30 @@
-defmodule TheBardBot.BotUser.Slack do
-  @behaviour TheBardBot.BotUser
+defmodule TheBardBot.BotWriter.Slack do
+  @behaviour TheBardBot.BotWriter
 
   require Logger
 
+  alias TheBardBot.Messages
   alias Mint.HTTP1, as: HTTP
 
   @slack Application.get_env(:the_bard_bot, :slack)
 
   @impl true
-  def post_message(message, channel) do
+  def write(%Messages.Outgoing{type: :challenge} = message) do
+    {:ok, %{challenge: message.value}}
+  end
+
+  @impl true
+  def write(%Messages.Outgoing{type: :event} = message) do
+    case post_message(message.value, message.destination) do
+      {:ok} -> {:no_content, nil}
+      {:error} -> {:internal_server_error, nil}
+    end
+  end
+
+  @impl true
+  def write(_), do: {:accepted, ""}
+
+  defp post_message(message, channel) do
     path = "/api/chat.postMessage"
 
     headers = [
@@ -36,7 +52,6 @@ defmodule TheBardBot.BotUser.Slack do
 
   defp post_message(host, path, headers, body) do
     Logger.info("Request: POST to #{host}#{path}...")
-    IO.inspect(headers)
 
     {:ok, conn} = HTTP.connect(:https, host, 443)
     {:ok, conn, _} = HTTP.request(conn, "POST", path, headers, body)
