@@ -3,8 +3,7 @@ import Config
 config :the_bard_bot,
   words: "assets/words.csv"
 
-config :the_bard_bot, :bot_writer, TheBardBot.BotWriter.Slack
-config :the_bard_bot, :bot_reader, TheBardBot.BotReader.Slack
+config :the_bard_bot, :bot_interpreter, TheBardBot.Web.BotInterpreter.Slack
 
 config :the_bard_bot, :slack,
   host: "",

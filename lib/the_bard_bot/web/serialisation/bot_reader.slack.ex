@@ -1,18 +1,13 @@
-defmodule TheBardBot.BotReader.Slack do
-  @behaviour TheBardBot.BotReader
-
+defmodule TheBardBot.Web.Serialisation.BotReader.Slack do
   require Logger
 
-  alias TheBardBot.Messages.Incoming
+  alias TheBardBot.Core.Messages.Incoming
 
-  @impl true
   def read(%{"challenge" => value}), do: parsed(:challenge, value)
 
-  @impl true
   def read(%{"event" => _} = value),
     do: parse_event(Map.get(value, "authed_users"), Map.get(value, "event"))
 
-  @impl true
   def read(_), do: empty()
 
   defp parse_event(authed_users, %{"type" => "app_mention"} = event) do
@@ -24,27 +19,24 @@ defmodule TheBardBot.BotReader.Slack do
       |> Enum.filter(&(&1["type"] == "rich_text_section"))
       |> Enum.flat_map(& &1["elements"])
 
-    find_elements = fn type, key ->
+    find_elements = fn type, key, formatter ->
       rich_text_elements
       |> Enum.filter(&(&1["type"] == type))
       |> Enum.map(& &1[key])
+      |> Enum.map(&formatter.(&1))
     end
 
-    text =
-      find_elements.("text", "text")
-      |> Enum.map(&String.trim/1)
+    user_formatter = fn u -> "<@#{u}>" end
+    text = find_elements.("text", "text", &String.trim/1)
+    users = find_elements.("user", "user_id", &user_formatter.(&1))
+    authed_users = authed_users |> Enum.map(&user_formatter.(&1))
 
-    users =
-      find_elements.("user", "user_id")
-      |> MapSet.new()
-      |> MapSet.difference(MapSet.new(authed_users))
-      |> Enum.map(&"<@#{&1}>")
-
-    event = %TheBardBot.Event{
+    event = %TheBardBot.Core.Event{
       type: event["type"],
       text: text,
+      authed_users: authed_users,
       users: users,
-      source: event["channel"]
+      channel: event["channel"]
     }
 
     parsed(:event, event)

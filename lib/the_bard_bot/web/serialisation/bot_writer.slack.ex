@@ -1,28 +1,35 @@
-defmodule TheBardBot.BotWriter.Slack do
-  @behaviour TheBardBot.BotWriter
-
+defmodule TheBardBot.Web.Serialisation.BotWriter.Slack do
   require Logger
 
-  alias TheBardBot.Messages
+  alias TheBardBot.Core.Messages
   alias Mint.HTTP1, as: HTTP
 
   @slack Application.get_env(:the_bard_bot, :slack)
 
-  @impl true
+  def write([_ | _] = messages) do
+    write_multiple(messages, nil)
+  end
+
   def write(%Messages.Outgoing{type: :challenge} = message) do
     {:ok, %{challenge: message.value}}
   end
 
-  @impl true
   def write(%Messages.Outgoing{type: :event} = message) do
-    case post_message(message.value, message.destination) do
+    case post_message(message.value, message.channel) do
       {:ok} -> {:no_content, nil}
       {:error} -> {:internal_server_error, nil}
     end
   end
 
-  @impl true
   def write(_), do: {:accepted, ""}
+
+  defp write_multiple([], response), do: response
+  defp write_multiple(_, {:internal_server_error, _} = response), do: response
+
+  defp write_multiple([head | tail], _) do
+    response = write(head)
+    write_multiple(tail, response)
+  end
 
   defp post_message(message, channel) do
     path = "/api/chat.postMessage"
