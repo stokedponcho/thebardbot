@@ -8,6 +8,7 @@ config :the_bard_bot, :bot_interpreter, TheBardBot.Web.BotInterpreter.Slack
 config :the_bard_bot, :slack,
   host: "",
   authorization_header: "",
+  token: "",
   content_type: "application/json"
 
 config :cowboy,

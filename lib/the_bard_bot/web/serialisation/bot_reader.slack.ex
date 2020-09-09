@@ -3,8 +3,6 @@ defmodule TheBardBot.Web.Serialisation.BotReader.Slack do
 
   alias TheBardBot.Core.Messages.Incoming
 
-  def read(%{"challenge" => value}), do: parsed(:challenge, value)
-
   def read(%{"event" => _} = value),
     do: parse_event(Map.get(value, "authed_users"), Map.get(value, "event"))
 
@@ -39,11 +37,10 @@ defmodule TheBardBot.Web.Serialisation.BotReader.Slack do
       channel: event["channel"]
     }
 
-    parsed(:event, event)
+    %Incoming{type: :event, value: event}
   end
 
   defp parse_event(_, _), do: empty()
 
-  defp parsed(type, value), do: %Incoming{type: type, value: value}
   defp empty(), do: %Incoming{type: :unknown, value: %{}}
 end

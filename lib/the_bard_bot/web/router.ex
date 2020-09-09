@@ -1,24 +1,24 @@
 defmodule TheBardBot.Web.Router do
   use Plug.Router
 
+  require Logger
+
   if Mix.env() == :dev do
     use Plug.Debugger
   end
 
-  require Logger
-
-  alias TheBardBot.Core.Bard
+  plug(Plug.Logger)
+  plug(:match)
+  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
+  plug(TheBardBot.Web.Middleware.SlackPlug)
+  plug(:dispatch)
 
   @bot_interpreter Application.get_env(
                      :the_bard_bot,
                      :bot_interpreter,
                      TheBardBot.Web.BotInterpreter
                    )
-
-  plug(Plug.Logger)
-  plug(:match)
-  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
-  plug(:dispatch)
+  alias TheBardBot.Core.Bard
 
   get "/" do
     send_response(conn, 200, Bard.sing())
@@ -36,7 +36,7 @@ defmodule TheBardBot.Web.Router do
   end
 
   match _ do
-    send_resp(conn, :not_found, "not found")
+    send_resp(conn, :not_found, "Not Found")
   end
 
   defp send_response(conn, status, value) do

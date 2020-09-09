@@ -12,7 +12,7 @@
                         "elements": [
                             {
                                 "type": "user",
-                                "user_id": "user"
+                                "user_id": "user1"
                             },
                             {
                                 "text": " hello ",
@@ -20,7 +20,7 @@
                             },
                             {
                                 "type": "user",
-                                "user_id": "U96EW6MGT"
+                                "user_id": "user2"
                             }
                         ],
                         "type": "rich_text_section"

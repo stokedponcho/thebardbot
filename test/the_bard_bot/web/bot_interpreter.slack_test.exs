@@ -5,7 +5,7 @@ defmodule TheBardBot.Web.BotInterpreter.SlackTest do
   alias TheBardBot.Web.BotInterpreter.Slack, as: BotInterpreter
 
   describe "read" do
-    test "it parses JSON from Slack" do
+    test "parses JSON from Slack for app_mention event" do
       content = %{
         "authed_users" => [
           "BOTUSERID"
@@ -67,7 +67,7 @@ defmodule TheBardBot.Web.BotInterpreter.SlackTest do
   describe "write" do
     test "returns value on challenge" do
       message = %Messages.Outgoing{
-        type: :challenge,
+        type: :url_verification,
         value: "value"
       }
 

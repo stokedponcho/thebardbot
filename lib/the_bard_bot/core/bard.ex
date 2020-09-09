@@ -51,13 +51,16 @@ defmodule TheBardBot.Core.Bard do
   end
 
   @doc """
-    Returns an Outgoing message in reaction to the Incoming one.
+    Returns Outgoing messages in reaction to the Incoming one.
   """
   def answer(%{type: :event, value: event} = input) do
     if event.text |> Enum.any?(&(&1 == "serenade")) do
       authed_users = MapSet.new(event.authed_users)
-      users = MapSet.new(event.users)
-      users = MapSet.difference(users, authed_users)
+
+      users =
+        event.users
+        |> MapSet.new()
+        |> MapSet.difference(authed_users)
 
       users
       |> Enum.map(fn user ->

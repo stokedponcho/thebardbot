@@ -1,12 +1,15 @@
 defmodule TheBardBot.Web.BotInterpreter.Slack do
-  alias TheBardBot.Web.Serialisation
+  @behaviour TheBardBot.Web.BotInterpreter
+
+  alias TheBardBot.Web.Serialisation.BotReader
+  alias TheBardBot.Web.Serialisation.BotWriter
 
   @impl true
-  def read(content), do: Serialisation.BotReader.Slack.read(content)
+  def read(content), do: BotReader.Slack.read(content)
 
   @impl true
-  def write(message), do: Serialisation.BotWriter.Slack.write(message)
+  def write([messages]), do: BotWriter.Slack.write(messages)
 
   @impl true
-  def write(messages), do: Serialisation.BotWriter.Slack.write(messages)
+  def write(message), do: BotWriter.Slack.write(message)
 end

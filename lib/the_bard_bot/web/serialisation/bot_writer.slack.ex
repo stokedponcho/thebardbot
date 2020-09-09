@@ -10,7 +10,7 @@ defmodule TheBardBot.Web.Serialisation.BotWriter.Slack do
     write_multiple(messages, nil)
   end
 
-  def write(%Messages.Outgoing{type: :challenge} = message) do
+  def write(%Messages.Outgoing{type: :url_verification} = message) do
     {:ok, %{challenge: message.value}}
   end
 

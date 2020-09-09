@@ -10,19 +10,36 @@ defmodule TheBardBot.Web.RouterTest do
   setup :verify_on_exit!
 
   describe "POST requests" do
-    test "it returns BotInterpreter response" do
+    test "returns BotInterpreter response" do
       TheBardBot.Web.BotInterpreter.Mock
-      |> expect(:read, fn content -> TheBardBot.Web.BotInterpreter.Slack.read(content) end)
+      |> expect(:read, &TheBardBot.Web.BotInterpreter.Slack.read/1)
 
       TheBardBot.Web.BotInterpreter.Mock
       |> expect(:write, fn _ -> {:no_content, nil} end)
 
-      conn = conn(:post, "/", %{})
+      conn =
+        conn(:post, "/", %{
+          token: "token"
+        })
 
       conn = Router.call(conn, @opts)
 
       assert conn.status == 204
       assert conn.resp_body == ""
     end
+  end
+
+  test "it returns challenge" do
+    conn =
+      conn(:post, "/", %{
+        type: "url_verification",
+        challenge: "hello",
+        token: "token"
+      })
+
+    conn = Router.call(conn, @opts)
+
+    assert conn.status == 200
+    assert conn.resp_body == Jason.encode!(conn.body_params)
   end
 end
