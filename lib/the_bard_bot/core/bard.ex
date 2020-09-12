@@ -51,27 +51,28 @@ defmodule TheBardBot.Core.Bard do
   end
 
   @doc """
-    Returns Outgoing messages in reaction to the Incoming one.
+    Returns Outgoing messages in answer to the Incoming one.
   """
+  @spec answer(input :: Messages.Incoming.t()) :: list(Messages.Outgoing.t())
   def answer(%{type: :event, value: event} = input) do
-    if event.text |> Enum.any?(&(&1 == "serenade")) do
-      authed_users = MapSet.new(event.authed_users)
+    create_message = fn value ->
+      %Messages.Outgoing{
+        type: input.type,
+        value: value,
+        channel: event.channel
+      }
+    end
 
-      users =
-        event.users
-        |> MapSet.new()
-        |> MapSet.difference(authed_users)
+    cond do
+      # check if target is itself
+      trick?(event) ->
+        [create_message.("Nice try. Connard.")]
 
-      users
-      |> Enum.map(fn user ->
-        %Messages.Outgoing{
-          type: input.type,
-          value: sing(user),
-          channel: event.channel
-        }
-      end)
-    else
-      []
+      serenade_asked?(event) ->
+        serenade(event, create_message)
+
+      true ->
+        []
     end
   end
 
@@ -91,5 +92,27 @@ defmodule TheBardBot.Core.Bard do
       acc ++ Enum.take_random(column, 1)
     end)
     |> Enum.join(" ")
+  end
+
+  defp trick?(event) do
+    event.users
+    |> Enum.filter(&(&1 in event.authed_users))
+    |> Enum.count() > 1
+  end
+
+  defp serenade_asked?(event), do: event.text |> Enum.any?(&(&1 == "serenade"))
+
+  defp serenade(event, create_message) do
+    authed_users = MapSet.new(event.authed_users)
+
+    users =
+      event.users
+      |> MapSet.new()
+      |> MapSet.difference(authed_users)
+
+    users
+    |> Enum.map(fn user ->
+      create_message.(sing(user))
+    end)
   end
 end

@@ -25,7 +25,7 @@ defmodule TheBardBot.Core.BardTest do
     end
   end
 
-  describe "answers to serenade" do
+  describe "answer to serenade" do
     setup do
       {:ok,
        message: %Messages.Incoming{
@@ -34,22 +34,52 @@ defmodule TheBardBot.Core.BardTest do
            type: "app_mention",
            text: ["serenade"],
            authed_users: ["<@BOTUSERID>"],
-           users: ["<@BOTUSERID>", "<@OTHERUSERID>"],
+           users: ["<@BOTUSERID>", "<@OTHERUSERID>", "<@OTHERUSERID>", "<@ANOTHERUSERID>"],
            channel: "CHANNELID"
          }
        }}
     end
 
-    test "with only one message, excluding bot user", context do
+    test "returns only two messages, excluding bot user", context do
+      result = Bard.answer(context[:message])
+
+      assert length(result) == 2
+    end
+
+    test "returns same channel", context do
+      result = Bard.answer(context[:message])
+      result = hd(result)
+
+      assert result.channel == "CHANNELID"
+    end
+  end
+
+  describe "anwser detects attempt to unleash thebardbot on thebardbot" do
+    setup do
+      {:ok,
+       message: %Messages.Incoming{
+         type: :event,
+         value: %Event{
+           type: "app_mention",
+           authed_users: ["<@BOTUSERID>"],
+           text: [],
+           users: ["<@BOTUSERID>", "<@BOTUSERID>", "<@OTHERUSERID>"],
+           channel: "CHANNELID"
+         }
+       }}
+    end
+
+    test "returns one message", context do
       result = Bard.answer(context[:message])
 
       assert length(result) == 1
     end
 
-    test "with same channel", context do
+    test "returns diss", context do
       result = Bard.answer(context[:message])
       result = hd(result)
 
+      assert result.value == "Nice try. Connard."
       assert result.channel == "CHANNELID"
     end
   end
