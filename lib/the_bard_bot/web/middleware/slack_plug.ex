@@ -28,7 +28,7 @@ defmodule TheBardBot.Web.Middleware.SlackPlug do
         |> send_resp(200, Jason.encode!(conn.body_params))
         |> halt()
 
-      __ ->
+      _ ->
         conn
     end
   end

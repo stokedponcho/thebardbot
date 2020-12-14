@@ -4,8 +4,8 @@ defmodule TheBardBot.MixProject do
   def project do
     [
       app: :the_bard_bot,
-      version: "0.1.7",
-      elixir: "~> 1.9",
+      version: "0.1.8",
+      elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       releases: [
@@ -34,7 +34,8 @@ defmodule TheBardBot.MixProject do
       {:jason, "~> 1.0"},
       {:mint, "~> 1.0"},
       {:castore, "~> 0.0"},
-      {:mox, "~> 0.0", only: :test}
+      {:mox, "~> 0.0", only: :test},
+      {:erlport, "~> 0.10"}
     ]
   end
 

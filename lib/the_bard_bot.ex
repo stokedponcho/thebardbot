@@ -9,7 +9,8 @@ defmodule TheBardBot do
     children = [
       # Starts a worker by calling: TheBardBot.Worker.start_link(arg)
       # {TheBardBot.Worker, arg}
-      {Plug.Cowboy, scheme: :http, plug: TheBardBot.Web.Router, port: port()}
+      {Plug.Cowboy, scheme: :http, plug: TheBardBot.Web.Router, port: port()},
+      {TheBardBot.Jobs.QuoteOfTheDay, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

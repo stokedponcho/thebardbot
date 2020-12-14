@@ -14,17 +14,12 @@ defmodule TheBardBot.Web.Serialisation.BotWriter.Slack do
     {:ok, %{challenge: message.value}}
   end
 
-  def write(%Messages.Outgoing{type: :event} = message) do
-    case post_message(message.value, message.channel) do
-      {:ok} -> {:no_content, nil}
-      {:error} -> {:internal_server_error, nil}
-    end
+  def write(message) do
+    post_message(message.value, message.channel)
+    {:no_content, nil}
   end
 
-  def write(_), do: {:accepted, ""}
-
   defp write_multiple([], response), do: response
-  defp write_multiple(_, {:internal_server_error, _} = response), do: response
 
   defp write_multiple([head | tail], _) do
     response = write(head)
@@ -47,18 +42,16 @@ defmodule TheBardBot.Web.Serialisation.BotWriter.Slack do
 
     result = post_message(@slack[:host], path, headers, content)
 
-    case result.data.ok do
-      true ->
-        {:ok}
-
-      false ->
-        Logger.error(inspect(result.data))
-        {:error}
+    if result.data.ok == false do
+      Logger.error(inspect(result))
+      raise result.data.error
     end
   end
 
   defp post_message(host, path, headers, body) do
     Logger.info("Request: POST to #{host}#{path}...")
+    Logger.info(inspect(headers))
+    Logger.info(inspect(body))
 
     {:ok, conn} = HTTP.connect(:https, host, 443)
     {:ok, conn, _} = HTTP.request(conn, "POST", path, headers, body)
@@ -86,6 +79,7 @@ defmodule TheBardBot.Web.Serialisation.BotWriter.Slack do
   end
 
   defp process_response(conn, {:data, _, value}, state) do
+    Logger.debug(inspect(value))
     state = Map.put(state, :data, Jason.decode!(value, keys: :atoms))
     process_response(conn, state)
   end
