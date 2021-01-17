@@ -3,12 +3,13 @@ Description={{ app_name }} Podman container
 Wants=syslog.service
 
 [Service]
-Type=simple
 User={{ deploy_user }}
-Group={{ deploy_group }}
-ExecStart=/usr/bin/bash {{ systemd_script }}
+Group={{ deploy_user }}
+Restart=on-failure
+
+Type=simple
+ExecStart=/bin/sh {{ systemd_script }}
 ExecStop=/usr/bin/podman stop -t 10 {{ app_name }}
-Restart=always
 
 [Install]
 WantedBy=multi-user.target

@@ -17,7 +17,7 @@ VIPS = [
         'Steve Wozniak',
         'Edsger W. Dijkstra',
         'Alan Perlis',
-        'Linus Torvalds',
+        'Barack Obama',
         'Donald Trump'
 ]
 

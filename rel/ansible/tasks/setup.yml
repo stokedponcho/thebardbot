@@ -6,32 +6,24 @@
   vars_files:
     - "../vars/main.yml"
   tasks:
-    - name: "Add {{ deploy_group }} group"
-      group:
-        name={{ deploy_group }}
-        state=present
-
     - name: "Add {{ deploy_user }} user"
       user:
-        name={{ deploy_user }}
-        groups={{ deploy_group }}
-        append=yes state=present
-
-    - name: "Ensure ownership of {{ deploy_user }} home directory"
-      file:
-        path=/home/{{ deploy_user }}
-        owner={{ deploy_user }}
-        group={{ deploy_group }}
-        recurse=yes
+        name: "{{ deploy_user }}"
+        createhome: "yes"
+        shell: "/bin/bash"
+        state: "present"
 
     - name: "Create {{ deploy_dirs }} dirs"
       file:
-        path={{ item }}
-        state=directory
-        owner={{ deploy_user }}
-        group={{ deploy_group }}
-        mode=0700
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: 0700
       with_items: "{{ deploy_dirs }}"
+
+    - name: "Ensure sudo is installed"
+      raw: apt install -y sudo
 
     - name: "Create sudoer config for {{ deploy_user }}"
       template:
@@ -48,3 +40,16 @@
         owner: root
         group: root
         mode: 0644
+
+    - name: Enable Systemd service for application
+      systemd:
+        name: "{{ app_name }}"
+        enabled: yes
+
+    - name: "Copy nginx site configuration"
+      template:
+        src: "../templates/nginx-site.j2"
+        dest: "/etc/nginx/conf.d/{{ app_name }}.conf"
+        owner: root
+        group: root
+        mode: 0600

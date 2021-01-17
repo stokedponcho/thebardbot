@@ -25,21 +25,22 @@
       raw: gzip -d -k {{ deploy_dir }}/{{ app_tarball }}
       when: not new_archive.stat.exists
 
-    - name: "Set files ownership to {{ deploy_user }}:{{ deploy_group }}"
+    - name: "Set files ownership to {{ deploy_user }}:{{ deploy_user }}"
       file:
         path: "{{ deploy_dir }}"
         recurse: yes
         owner: "{{ deploy_user }}"
-        group: "{{ deploy_group }}"
-        mode: 0700
+        group: "{{ deploy_user }}"
 
     - name: "Copy service script"
       template:
         src: "../templates/service.j2"
         dest: "{{ systemd_script }}"
         owner: "{{ deploy_user }}"
-        group: "{{ deploy_group }}"
+        group: "{{ deploy_user }}"
         mode: 0700
 
-    - name: "Start app"
-      raw: /bin/systemctl restart {{ app_name }}
+    - name: Restart service
+      service:
+        name: "{{ app_name }}"
+        state: restarted

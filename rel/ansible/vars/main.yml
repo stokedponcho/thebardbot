@@ -1,4 +1,6 @@
 ---
+ansible_python_interpreter: /usr/bin/python3
+
 app_port: "{{ lookup('env', 'APP_PORT') }}"
 app_name: "{{ lookup('env', 'APP_NAME') }}"
 app_version: "{{ lookup('env', 'APP_VERSION') }}"
@@ -11,12 +13,10 @@ systemd_script: "{{ deploy_dir }}/service.sh"
 # Main app server config
 # OS user that deploys / owns the release files
 deploy_user: "{{ app_name }}"
-# OS group that deploys / owns the release files
-deploy_group: "{{ deploy_user }}"
 
 # Base directory for deploy files
-deploy_dir: "/opt/{{ app_name }}"
+deploy_dir: "/home/{{ deploy_user }}/app"
 
-# Directories own by the deploy user
+# Directories owned by the deploy user
 deploy_dirs:
   - "{{ deploy_dir }}"

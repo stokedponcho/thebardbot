@@ -8,7 +8,7 @@ A first project using [Elixir] and a first foray into a functional language.
 
 Simple API using [cowboy], [plug] and [jason].
 
-Releases are built into a rootless container using [podman].
+Releases are built into a rootless container using [podman]. Be aware that the releae image is built with this in mind, make security adjustment if using docker or other non rootless container.
 
 Deployments are made manually with Ansible.
 

@@ -45,4 +45,4 @@ COPY --from=builder _build/$ENV/rel/default/ .
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH="/opt/venv/lib/python3.8/site-packages:$PYTHONPATH"
 
-CMD ["/app/bin/default", "start"]
+CMD ["bin/default", "start"]
