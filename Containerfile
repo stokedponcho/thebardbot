@@ -1,4 +1,4 @@
-# ---- APplication build stage ----
+# ---- Application build stage ----
 FROM docker.io/elixir:1.11-alpine as builder
 
 ARG ENV
@@ -42,6 +42,7 @@ WORKDIR /app
 COPY --from=wikiquote /opt/venv /opt/venv
 COPY --from=builder _build/$ENV/rel/default/ .
 
+ENV HOME=/app
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONPATH="/opt/venv/lib/python3.8/site-packages:$PYTHONPATH"
 

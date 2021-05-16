@@ -15,8 +15,11 @@ defmodule TheBardBot.Jobs.QuoteOfTheDay do
 
   @impl true
   def init(state) do
-    if @settings[:run_on_init], do: do_work()
-    schedule_next()
+    if @settings[:enabled] do
+      if @settings[:run_on_init], do: do_work()
+      schedule_next()
+    end
+
     {:ok, state}
   end
 
